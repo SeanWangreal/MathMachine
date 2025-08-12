@@ -166,7 +166,7 @@ public class CalculateUtil {
 
 		this.formula = new LinkedList<String>();
 
-		String function = "";
+		StringBuilder function = new StringBuilder();
 
 		boolean complex = false;
 
@@ -178,37 +178,37 @@ public class CalculateUtil {
 
 			if (s.equals("(")) {
 				if (countLeftParentheses != 0) {
-					function += s;
+					function.append(s);
 				}
 				countLeftParentheses++;
 				complex = true;
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
-					function += s;
+					function.append(s);
 				}
 				if (countLeftParentheses == countRightParentheses) {
-					this.formula.add(function);
+					this.formula.add(function.toString());
 					complex = false;
-					function = "";
+					function = new StringBuilder();
 					countLeftParentheses = 0;
 					countRightParentheses = 0;
 				}
 			} else {
 
 				if (complex) {
-					function += s;
+					function.append(s);
 				} else {
 					if (isOperation(s)) {
 						this.formula.add(s);
 					} else {
 						int nextIndex = i + 1;
 						if (nextIndex < formulaList.size() && !isOperation(formulaList.get(nextIndex)))
-							function += s;
+							function.append(s);
 						else {
-							function += s;
-							this.formula.add(function);
-							function = "";
+							function.append(s);
+							this.formula.add(function.toString());
+							function = new StringBuilder();
 						}
 					}
 				}
@@ -278,7 +278,7 @@ public class CalculateUtil {
 		return filnalResult.toString();
 	}
 
-	public static Boolean runComparativeExpression(String formulaLeft, Map<String, String> leftVariable,
+	public static boolean runComparativeExpression(String formulaLeft, Map<String, String> leftVariable,
 			String comparativeOperation, String formulaRight, Map<String, String> rightVariable) throws Exception {
 		CalculateUtil leftCalculateUtil = new CalculateUtil();
 		CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
@@ -300,78 +300,47 @@ public class CalculateUtil {
 		rightCalculateUtil.runFormula();
 		future.join();
 
-		Boolean fitOrNot = null;
-		
-		Double leftAns = new BigDecimal(leftCalculateUtil.getAns()).doubleValue();
-		
-		Double rightAns = new BigDecimal(rightCalculateUtil.getAns()).doubleValue();
+		boolean fitOrNot = false;
 
+		double leftAns = new BigDecimal(leftCalculateUtil.getAns()).doubleValue();
+		
+		double rightAns = new BigDecimal(rightCalculateUtil.getAns()).doubleValue();
 
 		switch (comparativeOperation) {
 		case ">": {
 			fitOrNot = leftAns > rightAns;
 			break;
 		}
-		case ">=": {
+		case ">=", "≥", "≧": {
 			fitOrNot = leftAns >= rightAns;
 			break;
 		}
-		case "≥": {
-			fitOrNot = leftAns >= rightAns;
-			break;
+        case "<": {
+            fitOrNot = leftAns < rightAns;
+            break;
 		}
-		case "≧": {
-			fitOrNot = leftAns >= rightAns;
-			break;
-		}
-		case "<": {
-			fitOrNot = leftAns < rightAns;
-			break;
-		}
-		case "<=": {
+		case "<=", "≤", "≦": {
 			fitOrNot = leftAns <= rightAns;
 			break;
 		}
-		case "≤": {
-			fitOrNot = leftAns <= rightAns;
-			break;
-		}
-		case "≦": {
-			fitOrNot = leftAns <= rightAns;
-			break;
-		}
-		case "=": {
+        case "=": {
 			fitOrNot = leftAns == rightAns;
 			break;
 		}
-		case "!=": {
-			fitOrNot = leftAns != rightAns;
-			break;
-		}
-		case "≠": {
+		case "!=", "≠": {
 			fitOrNot = leftAns != rightAns;
 			break;
 		}
 
-		}
+        }
 		return fitOrNot;
 	}
 
 	private boolean isOperation(String s) {
 		switch (s) {
-		case "+":
+		case "+", "-", "*", "/", "÷", "^":
 			return true;
-		case "-":
-			return true;
-		case "*":
-			return true;
-		case "/":
-			return true;
-		case "÷":
-			return true;
-		case "^":
-			return true;
-		default:
+        default:
 			return false;
 		}
 	}
